@@ -3,7 +3,7 @@
     <h3 *ngIf="!edit">
         {{note.title}}
     </h3>
-    <textarea *ngIf="edit" [(ngModel)]="note.content"></textarea>
+    <textarea *ngIf="edit"[(ngModel)]="note.content"></textarea>
     <p *ngIf="!edit">
         {{note.content}}
     </p>
