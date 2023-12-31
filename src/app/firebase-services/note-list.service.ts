@@ -10,36 +10,15 @@ export class NoteListService {
   trashNotes: Note[] = [];
   normalNotes: Note[] = [];
 
-  items$; // ist ein Observable-man kann auf Veränderungen damit reagieren
-  items;
 
-  unsubList;
-  unsubSingle;
+  unsubTrash;
+  unsubNotes;
 
   firestore: Firestore = inject(Firestore); // Firestore (Datenbank) wird in Angular eingebunden
 
   constructor() {
-    //onSnapshot
-    this.unsubList = onSnapshot(this.getNotesRef(), (list) => {
-      list.forEach(element => {
-        console.log(element.data());
-      });
-    });
-
-    this.unsubSingle = onSnapshot(this.getSingleDocRef("notes", "sadad3sfsdgdsgf"), (element) => {
-    });
-    
-    
-
-//collectionData
-    this.items$ = collectionData(this.getNotesRef());
-
-    this.items = this.items$.subscribe((list) => {
-      list.forEach((element) => {
-        console.log(element);
-      });
-    })
-   
+    this.unsubNotes = this.subNotesList();
+    this.unsubTrash = this.subTrashList();
   }
 
   setNoteObject(obj: any, id: string): Note {
@@ -53,9 +32,28 @@ export class NoteListService {
   }
 
   ngonDestroy() {
-    this.items.unsubscribe(); // beendet subscribe
-    this.unsubList();
-    this.unsubSingle();
+    this.unsubTrash();
+    this.unsubNotes();
+  }
+
+  subTrashList() {
+   return onSnapshot(this.getTrashRef(), (list) => {
+    this.trashNotes = [];
+      list.forEach(element => {
+        this.trashNotes.push(this.setNoteObject(element.data(), element.id));
+      });
+    });
+  }
+
+  subNotesList() {
+    return onSnapshot(this.getNotesRef(), (list) => {
+      this.normalNotes = [];
+      list.forEach(element => {
+        this.normalNotes.push(this.setNoteObject(element.data(), element.id));
+        console.log(this.setNoteObject(element.data(), element.id));
+        console.log(element.data());
+      });
+    });
   }
 
   // hier wird auf notes in der Datenbank zugegriffen
@@ -64,7 +62,7 @@ export class NoteListService {
   }
 
   // hier wird auf Trash in der Datenbank zugegriffen
-  getTrahsRef() {
+  getTrashRef() {
     return collection(this.firestore, 'trash');
   }
 
